@@ -2,11 +2,12 @@
 --Onmyou Warrior Sakakaze
 local s,id=GetID()
 function s.initial_effect(c)
-	--Send itself to GY, draw 3, then send 3 cards from hand to GY
+	--shuffle to deck
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetCategory(CATEGORY_TODECK)
+	e1:SetCountLimit(1)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetCondition(s.condition)
 	e1:SetTarget(s.target)
@@ -17,7 +18,7 @@ function s.condition(e)
 	return Duel.IsExistingMatchingCard(aux.FilterFaceupFunction(Card.IsRace,RACE_WARRIOR),e:GetHandlerPlayer(),LOCATION_MZONE,0,1,e:GetHandler())
 end
 function s.filter(c)
-	return c:IsAbleToDeck()
+	return c:IsAbleToDeck() and c:IsType(TYPE_MONSTER)
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ct=Duel.GetMatchingGroupCount(Card.IsType,tp,0,LOCATION_ONFIELD,nil,TYPE_SPELL+TYPE_TRAP)

@@ -1,5 +1,5 @@
 -- ベアルクティ－グラン＝シャリオ
--- Bearcti – Grand Chariot
+-- Ursarctic Grand Chariot
 local s,id=GetID()
 function s.initial_effect(c)
 	--Must be properly summoned before reviving
@@ -40,7 +40,7 @@ function s.initial_effect(c)
 	e4:SetRange(LOCATION_MZONE)
 	e4:SetCountLimit(1)
 	e4:SetCondition(s.discon)
-	e4:SetCost(s.discost)
+	e4:SetCost(aux.CostWithReplace(s.discost,CARD_URSARCTIC_BIG_DIPPER))
 	e4:SetTarget(s.distg)
 	e4:SetOperation(s.disop)
 	c:RegisterEffect(e4)
@@ -126,7 +126,5 @@ function s.distg(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function s.disop(e,tp,eg,ep,ev,re,r,rp)
-	if re:GetHandler():IsRelateToEffect(re) then
-		Duel.NegateActivation(ev)
-	end
+	Duel.NegateActivation(ev)
 end

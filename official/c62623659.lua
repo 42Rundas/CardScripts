@@ -14,13 +14,13 @@ function s.initial_effect(c)
 	e1:SetOperation(s.activate)
 	c:RegisterEffect(e1)
 end
-s.listed_series={0x7e,0x107e,0x207e,0x95,0x258}
+s.listed_series={0x7e,0x107e,0x207e,0x95,0x15d}
 
 function s.filter(c)
 	return c:IsAbleToDeck() and not c:IsPublic()
 end
 function s.thfilter(c)
-	return c:IsAbleToHand() and ((c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x107e) or c:IsSetCard(0x207e))) or (c:IsType(TYPE_SPELL) and (c:IsSetCard(0x7e) or c:IsSetCard(0x95) or c:IsSetCard(0x258))) or c:IsType(TYPE_TRAP) and c:IsSetCard(0x7e))
+	return c:IsAbleToHand() and ((c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x107e) or c:IsSetCard(0x207e))) or (c:IsType(TYPE_SPELL) and (c:IsSetCard(0x7e) or c:IsSetCard(0x95) or c:IsSetCard(0x15d))) or c:IsType(TYPE_TRAP) and c:IsSetCard(0x7e))
 end
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_HAND,0,1,e:GetHandler())

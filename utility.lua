@@ -5,10 +5,6 @@ function GetID()
 	return self_table,self_code
 end
 
-local function setcodecondition(e)
-	return e:GetHandler():IsCode(e:GetHandler():GetOriginalCodeRule())
-end
-
 function Auxiliary.CostWithReplace(base,replacecode,extracon)
 	local getvalideffs=function(e,tp,eg,ep,ev,re,r,rp,chk)
 		local t={}
@@ -59,6 +55,9 @@ function Auxiliary.CostWithReplace(base,replacecode,extracon)
 	end
 end
 
+local function setcodecondition(e)
+	return e:GetHandler():IsCode(e:GetHandler():GetOriginalCodeRule())
+end
 function Card.AddSetcodesRule(c,...)
 	local t={}
 	for _,setcode in pairs({...}) do
@@ -141,9 +140,10 @@ function bit.replace(r,v,field,width)
 	return (r&~(m<<f))|((v&m)<< f)
 end
 
-local _type = type
+local _type=type
 function type(o)
-	if _type(o)~="userdata" then return _type(o)
+	local tp=_type(o)
+	if tp~="userdata" then return tp
 	elseif o.GetOriginalCode then return "Card"
 	elseif o.KeepAlive then return "Group"
 	elseif o.SetLabelObject then return "Effect"
@@ -284,12 +284,22 @@ function Auxiliary.FilterBoolFunction(f,...)
 			end
 end
 
+local function GetMulti(tab,key,...)
+	if not key then return nil end
+	return (tab[key]~=nil and tab[key]) or GetMulti(tab,...)
+end
 function Auxiliary.ParamsFromTable(tab,key,...)
 	if key then
-		if ... then
-			return tab[key],Auxiliary.ParamsFromTable(tab,...)
+		local val
+		if type(key)=="table" then
+			val=GetMulti(tab,table.unpack(key))
 		else
-			return tab[key]
+			val=tab[key]
+		end
+		if ... then
+			return val,Auxiliary.ParamsFromTable(tab,...)
+		else
+			return val
 		end
 	end
 end
@@ -426,9 +436,17 @@ function Auxiliary.IsCodeListed(c,...)
 	end
 	return false
 end
---card effect disable filter(target)
+--"Can be negated" check for monsters
 function Auxiliary.disfilter1(c)
 	return c:IsFaceup() and not c:IsDisabled() and (not c:IsNonEffectMonster() or c:GetOriginalType()&TYPE_EFFECT~=0)
+end
+--"Can be negated" check for Spells/Traps
+function Auxiliary.disfilter2(c)
+	return c:IsFaceup() and not c:IsDisabled() and c:IsType(TYPE_SPELL+TYPE_TRAP)
+end
+--"Can be negated" check for cards
+function Auxiliary.disfilter3(c)
+	return aux.disfilter1(c) or aux.disfilter2(c)
 end
 --condition of EVENT_BATTLE_DESTROYING
 function Auxiliary.bdcon(e,tp,eg,ep,ev,re,r,rp)
@@ -1487,24 +1505,15 @@ function Auxiliary.PlayFieldSpell(c,e,tp,eg,ep,ev,re,r,rp)
 	return false
 end
 function Duel.IsMainPhase()
-	return Duel.GetCurrentPhase()==PHASE_MAIN1 or Duel.GetCurrentPhase()==PHASE_MAIN2
+	local phase=Duel.GetCurrentPhase()
+	return phase==PHASE_MAIN1 or phase==PHASE_MAIN2
 end
 function Duel.IsBattlePhase()
-	return Duel.GetCurrentPhase()>=PHASE_BATTLE_START and Duel.GetCurrentPhase()<=PHASE_BATTLE
+	local phase=Duel.GetCurrentPhase()
+	return phase>=PHASE_BATTLE_START and phase<=PHASE_BATTLE
 end
 function Duel.IsTurnPlayer(player)
 	return Duel.GetTurnPlayer()==player
-end
-function Auxiliary.DoubleSnareValidity(c,range,property)
-	if c then
-		if not property then property=0 end
-		local eff=Effect.CreateEffect(c)
-		eff:SetType(EFFECT_TYPE_SINGLE)
-		eff:SetProperty(EFFECT_FLAG_CANNOT_DISABLE|EFFECT_FLAG_SINGLE_RANGE|property)
-		eff:SetRange(range)
-		eff:SetCode(3682106)
-		c:RegisterEffect(eff)
-	end
 end
 
 function Auxiliary.ChangeBattleDamage(player,value)
@@ -1527,6 +1536,7 @@ end
 
 Duel.LoadScript("cards_specific_functions.lua")
 Duel.LoadScript("proc_fusion.lua")
+Duel.LoadScript("proc_fusion_spell.lua")
 Duel.LoadScript("proc_ritual.lua")
 Duel.LoadScript("proc_synchro.lua")
 Duel.LoadScript("proc_union.lua")

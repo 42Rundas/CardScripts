@@ -675,7 +675,7 @@ function Auxiliary.AddZWEquipLimit(c,con,equipval,equipop,linkedeff,prop,resetfl
 end
 
 -- Amazement and Ɐttraction helper functions
-local AA = {}
+AA = {}
 function AA.eqtgfilter(c,tp)
 	return c:IsFaceup() and (c:IsSetCard(0x15e) or (not c:IsControler(tp)))
 end
@@ -733,11 +733,11 @@ function Auxiliary.AttractionEquipCon(self)
 	end
 end
 function AA.eqsfilter(c,tp)
-	return c:IsSetCard(0x25e) and c:IsType(TYPE_TRAP) and c:GetEquipTarget() and
+	return c:IsSetCard(0x15f) and c:IsType(TYPE_TRAP) and c:GetEquipTarget() and
 	       Duel.IsExistingMatchingCard(AA.eqmfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,c:GetEquipTarget(),tp)
 end
 function AA.eqmfilter(c,tp)
-	return c:IsFaceup() and (c:IsSetCard(0x25d) or (not c:IsControler(tp)))
+	return c:IsFaceup() and (c:IsSetCard(0x15e) or (not c:IsControler(tp)))
 end
 function AA.qeqetg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return false end
@@ -848,5 +848,16 @@ local Stardust={}
 function Stardust.ReleaseSelfCost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsReleasable() end
 	Duel.Release(e:GetHandler(),REASON_COST)
+end
+function Auxiliary.DoubleSnareValidity(c,range,property)
+	if c then
+		if not property then property=0 end
+		local eff=Effect.CreateEffect(c)
+		eff:SetType(EFFECT_TYPE_SINGLE)
+		eff:SetProperty(EFFECT_FLAG_CANNOT_DISABLE|EFFECT_FLAG_SINGLE_RANGE|property)
+		eff:SetRange(range)
+		eff:SetCode(3682106)
+		c:RegisterEffect(eff)
+	end
 end
 Auxiliary.StardustCost=Auxiliary.CostWithReplace(Stardust.ReleaseSelfCost,84012625)
