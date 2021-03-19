@@ -1,5 +1,5 @@
 --金満で謙虚な壺
---Pot of Disparity
+--Pot of Prosperity
 --scripted by Hatter
 local s,id=GetID()
 function s.initial_effect(c)
@@ -31,7 +31,7 @@ function s.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetCode(EFFECT_CANNOT_DRAW)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT+EFFECT_FLAG_OATH)
-	e1:SetDescription(aux.Stringid(id,3))
+	e1:SetDescription(aux.Stringid(id,2))
 	e1:SetTargetRange(1,0)
 	e1:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e1,tp)
@@ -51,6 +51,7 @@ function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,0))
 	local d=Duel.AnnounceNumber(tp,table.unpack(ann))
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
 	local rg=g:Select(tp,d,d,nil)
 	Duel.Remove(rg,POS_FACEDOWN,REASON_COST)
 	e:SetLabel(d)
@@ -85,7 +86,7 @@ function s.operation(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetValue(s.damval)
 	e1:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e1,tp)
-	aux.RegisterClientHint(e:GetHandler(),nil,tp,1,0,aux.Stringid(id,2),nil)
+	aux.RegisterClientHint(e:GetHandler(),nil,tp,1,0,aux.Stringid(id,1),nil)
 end
 function s.damval(e,re,val,r,rp,rc)
 	return math.floor(val/2)

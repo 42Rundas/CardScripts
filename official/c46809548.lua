@@ -1,5 +1,5 @@
 --機巧牙－御神尊真神
---Gizmek Mikoto, the Cut-throat Cyclone Canine
+--Gizmek Makami, the Ferocious Fanged Fortress
 --scripted by AlphaKretin
 local s,id=GetID()
 function s.initial_effect(c)
@@ -42,7 +42,8 @@ end
 s.listed_names={id}
 function s.nscon(e,c)
 	if c==nil then return true end
-	return Duel.GetFieldGroupCount(c:GetControler(),LOCATION_REMOVED,0)>5
+	local tp=c:GetControler()
+	return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.GetFieldGroupCount(tp,LOCATION_REMOVED,0)>5
 end
 function s.thcfilter(c)
 	return c:IsType(TYPE_MONSTER) and c:IsDiscardable()
@@ -52,7 +53,7 @@ function s.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.DiscardHand(tp,s.thcfilter,1,1,REASON_COST+REASON_DISCARD)
 end
 function s.thfilter(c)
-	return not c:IsCode(id) and c:IsType(TYPE_MONSTER) and c:GetAttack()==c:GetDefense() and c:IsAttackAbove(0) and c:IsDefenseAbove(0)
+	return not c:IsCode(id) and c:IsType(TYPE_MONSTER) and c:IsDefense(c:GetAttack()) and c:IsAttackAbove(0) and c:IsDefenseAbove(0)
 end
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end

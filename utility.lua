@@ -5,25 +5,26 @@ function GetID()
 	return self_table,self_code
 end
 
-function Auxiliary.CostWithReplace(base,replacecode,extracon)
-	local getvalideffs=function(e,tp,eg,ep,ev,re,r,rp,chk)
-		local t={}
-		for _,eff in ipairs({Duel.GetPlayerEffect(tp,replacecode)}) do
-			if eff:CheckCountLimit(tp) then
-				local val=eff:GetValue()
-				if type(val)=="number" then
-					if val==1 then
-						table.insert(t,eff)
-					end
-				elseif type(val)=="function" then
-					if val(eff,e,tp,eg,ep,ev,re,r,rp,chk,extracon) then
-						table.insert(t,eff)
-					end
+local function cost_replace_getvalideffs(replacecode,extracon,e,tp,eg,ep,ev,re,r,rp,chk)
+	local t={}
+	for _,eff in ipairs({Duel.GetPlayerEffect(tp,replacecode)}) do
+		if eff:CheckCountLimit(tp) then
+		local val=eff:GetValue()
+			if type(val)=="number" then
+				if val==1 then
+					table.insert(t,eff)
+				end
+			elseif type(val)=="function" then
+				if val(eff,e,tp,eg,ep,ev,re,r,rp,chk,extracon) then
+					table.insert(t,eff)
 				end
 			end
 		end
-		return t
 	end
+	return t
+end
+
+function Auxiliary.CostWithReplace(base,replacecode,extracon)
 	return function(e,tp,eg,ep,ev,re,r,rp,chk)
 		local cond=base(e,tp,eg,ep,ev,re,r,rp,0)
 		if chk==0 then
@@ -37,7 +38,7 @@ function Auxiliary.CostWithReplace(base,replacecode,extracon)
 			end
 			return false
 		end
-		local effs=getvalideffs(e,tp,eg,ep,ev,re,r,rp,chk)
+		local effs=cost_replace_getvalideffs(replacecode,extracon,e,tp,eg,ep,ev,re,r,rp,chk)
 		if not cond or (cond and #effs>0 and Duel.SelectYesNo(tp,98)) then
 			local eff=effs[1]
 			if #effs>1 then
@@ -47,7 +48,7 @@ function Auxiliary.CostWithReplace(base,replacecode,extracon)
 				end
 				eff=effs[Duel.SelectOption(tp,false,table.unpack(desctable)) + 1]
 			end
-			local res={eff:GetOperation()(e,tp,eg,ep,ev,re,r,rp,chk)}
+			local res={eff:GetOperation()(eff,e,tp,eg,ep,ev,re,r,rp,chk)}
 			eff:UseCountLimit(tp)
 			return table.unpack(res)
 		end
@@ -169,6 +170,7 @@ function Auxiliary.Next(g)
 			end
 end
 Group.Iter=Auxiliary.Next
+Group.__bnot=Auxiliary.Next
 
 function Auxiliary.NULL()
 end
@@ -1532,6 +1534,26 @@ function Auxiliary.ChangeBattleDamage(player,value)
 					end
 				end
 		end
+end
+
+function Card.GetScale(c)
+	if not c:IsType(TYPE_PENDULUM) then return 0 end
+	local sc=0
+	if c:IsLocation(LOCATION_PZONE) then
+		local seq=c:GetSequence()
+		if seq==0 then sc=c:GetLeftScale() else sc=c:GetRightScale() end
+	else
+		sc=c:GetLeftScale()
+	end
+	return sc
+end
+function Card.IsOddScale(c)
+	if not c:IsType(TYPE_PENDULUM) then return false end
+	return c:GetScale() % 2 ~= 0
+end
+function Card.IsEvenScale(c)
+	if not c:IsType(TYPE_PENDULUM) then return false end
+	return c:GetScale() % 2 == 0
 end
 
 Duel.LoadScript("cards_specific_functions.lua")
